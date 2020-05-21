@@ -1,6 +1,6 @@
-{-# LANGUAGE 
+{-# LANGUAGE
     MultiParamTypeClasses
-  , TemplateHaskellQuotes 
+  , TemplateHaskellQuotes
 #-}
 
 module Examples.Data.ComplexTypes where
@@ -27,18 +27,18 @@ data User
   , userPhoneNumber  :: Maybe PhoneNumber
   } deriving (Show)
 
-instance Validatable MyError UserVM User where
+instance Validatable MyFailures UserVM User where
   validation u = do
     let vn = withField 'userVMUsername (userVMUsername u) $
-          \n -> isRequired RequiredError n
+          \n -> isRequired RequiredFailure n
           >>= refuteWithProof mkUsername
         ve = withField 'userVMEmailAddress (userVMEmailAddress u) $
-          \e -> isRequired RequiredError e 
+          \e -> isRequired RequiredFailure e
           >>= refuteWithProof mkEmailAddress
-        vp = optional (userVMPhoneNumber u) $ \un -> 
+        vp = optional (userVMPhoneNumber u) $ \un ->
           withField 'userVMPhoneNumber un $ refuteWithProof mkPhoneNumber
         otherCheck = withValue u check
     pure User <*> vn <*> ve <*> vp <! otherCheck
     where
       -- arbitrary check
-      check = disputeWithFact OtherError (\v -> userVMUsername v /= userVMEmailAddress v)
+      check = disputeWithFact OtherFailure (\v -> userVMUsername v /= userVMEmailAddress v)
