@@ -10,34 +10,27 @@ extra-source-files:  CHANGELOG.md, README.md
 
 library
   exposed-modules:    Data.Validation
+                    , Data.Validation.Internal
                     , Data.Validation.Transforms
   build-depends:      base ^>=4.12.0.0
                     , containers
-                    , data-validation-internal
-                    , regex-tdfa
                     , template-haskell
   hs-source-dirs:     src
   default-language:   Haskell2010
   ghc-options:       -Wall -j -O0 -v0
 
-library data-validation-internal
-  exposed-modules:    Data.Validation.Internal
-  build-depends:      base ^>=4.12.0.0
-                    , containers
-                    , template-haskell
-  hs-source-dirs:     internal
-  default-language:   Haskell2010
-  ghc-options:       -Wall -j -O0 -v0
-
-library examples-internal
-  exposed-modules:    Examples.Data.ComplexTypes
-                    , Examples.Data.Primitives
-  build-depends:      base ^>=4.12.0.0
-                    , data-validation
-                    , tagged
-  hs-source-dirs:     examples
-  default-language:   Haskell2010
-  ghc-options:       -Wall -j -O0 -v0
+-- example uses regex-tdfa which does not work with ghcjs
+if impl(ghc)
+  library examples-internal
+    exposed-modules:    Examples.Data.ComplexTypes
+                      , Examples.Data.Primitives
+    build-depends:      base ^>=4.12.0.0
+                      , data-validation
+                      , regex-tdfa
+                      , tagged
+    hs-source-dirs:     examples
+    default-language:   Haskell2010
+    ghc-options:       -Wall -j -O0 -v0
 
 test-suite test-data-validation
   type:             exitcode-stdio-1.0
@@ -48,7 +41,6 @@ test-suite test-data-validation
   build-depends:    base
                   , containers
                   , data-validation
-                  , data-validation-internal
                   , hspec
                   , template-haskell
   default-language:   Haskell2010

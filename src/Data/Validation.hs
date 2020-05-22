@@ -37,7 +37,7 @@ module Data.Validation
 , disputeMany
 , disputeWith
 , disputeWithFact
--- * General Validators	
+-- * General Validators
 , isRequired
 , isLeft
 , isRight
@@ -58,7 +58,6 @@ module Data.Validation
 , ifAll
 , ifEach
 , isMatch
-, matchesRegex
 -- * Validation Helpers
 , validateField
 , optional
@@ -80,13 +79,12 @@ import Data.Either (Either(..), rights, lefts)
 import Data.Map hiding (null)
 import Data.Maybe
 import Language.Haskell.TH (Name, mkName, nameBase)
-import Text.Regex.TDFA (RegexLike, RegexMaker, Regex, ExecOption, CompOption, (=~))
 ------------------------------------------------------------------------------------------------------------------------
 import Data.Validation.Internal
 ------------------------------------------------------------------------------------------------------------------------
 
 {- $basics
-  Validation generally takes the form of `a -> Either f b` where: 
+  Validation generally takes the form of `a -> Either f b` where:
 
   [@a@]: Some unvalidated type.
 
@@ -97,7 +95,7 @@ import Data.Validation.Internal
   Consider the following example:
 
   @
-  data MyFailures = EmptyEmailAddress | MalformedEmailAddress 
+  data MyFailures = EmptyEmailAddress | MalformedEmailAddress
   validateEmailAddress :: String -> Either MyFailures EmailAddress
   @
 
@@ -114,9 +112,9 @@ import Data.Validation.Internal
   The transformation from `a` to `b` is important and provides a type safe way to prove that validation was successful.
   However, rather than using the 'Either' type, this library uses the 'Proof' type.
   A 'Proof' represents either a validated type or a collection of failures.
-  Notice, we use the term validation /failures/ instead of /errors/ 
+  Notice, we use the term validation /failures/ instead of /errors/
   to differentiate between validation and error handling.
-  The reason we use the 'Proof' type is because it has a custom 'Control.Applicative.Applicative' instance 
+  The reason we use the 'Proof' type is because it has a custom 'Control.Applicative.Applicative' instance
   that will be helpful later.
 
   The 'Invalid' constructor takes a list of global failures and a map of field failures.
@@ -164,7 +162,7 @@ import Data.Validation.Internal
 -}
 
 -- | A type that holds either validation failures or a validated value.
-data Proof f a 
+data Proof f a
   = Valid a -- ^ A validated value.
   | Invalid [f] (Map [Name] [f]) -- ^ Global and field validation failures.
   deriving (Show, Eq)
@@ -201,7 +199,7 @@ instance Monad (Proof f) where
   However, once validation is complete, the result becomes binary.
   The validation has either succeeded or failed.
   In order to convert from a 'Data.Validation.Internal.VCtx' to a 'Proof', use the 'fromVCtx' function.
--} 
+-}
 fromVCtx :: VCtx f a -> Proof f a
 fromVCtx (ValidCtx a)            = Valid a
 fromVCtx (DisputedCtx gfs lfs _) = Invalid gfs lfs
@@ -262,8 +260,8 @@ withValue a fn = fn (Global a) >>= pure . getValue
   , mkEmailAddress
   ) where
 
-  data MyFailures = EmptyEmail | 
-  
+  data MyFailures = EmptyEmail |
+
   mkEmailAddress :: String -> Proof MyFailures EmailAddress
   mkEmailAddress s = fromVCtx $ do              -- (1)
     v \<- withValue s $ \\v -> do                 -- (2)
@@ -275,7 +273,7 @@ withValue a fn = fn (Global a) >>= pure . getValue
   Starting with line (2), the 'withValue' function is used to create a 'ValueCtx' using string passed into the function.
   The lambda function that follows takes the 'ValueCtx' and runs it through several validators using `do` syntax.
   This is possible because 'VCtx' has a 'Monad' instance.
-  
+
   Line (1) transforms the result from a 'VCtx' to a 'Proof' as discussed above.
 
   Line (3) and (4) demonstrate both a general validator and a custom validator.
@@ -295,9 +293,9 @@ withValue a fn = fn (Global a) >>= pure . getValue
   View models should be transformed into models when they are validated.
   So, like primitives, validating complex types should have the form validate :: a -> Proof f b.
 
-  For complex types, this can be accomplished with the 'Validatable f a b' type class. 
-  This type class takes 3 parameters: the failure type, the view model type, and the final model type. 
-  It requires the implementation of a single function: 'validation'. 
+  For complex types, this can be accomplished with the 'Validatable f a b' type class.
+  This type class takes 3 parameters: the failure type, the view model type, and the final model type.
+  It requires the implementation of a single function: 'validation'.
   Then the 'validate' function can be used to perform the actual validation.
   Consider the following example:
 
@@ -359,11 +357,11 @@ withValue a fn = fn (Global a) >>= pure . getValue
   It constructs the final type using applicative syntax.
   It uses the applicative instance on 'VCtx' to construct the final type.
   If all of the parameters are valid, the expression returns a valid `UserCreatable`.
-  However, if any of the parameters are invalid, the whole expression becomes invalid and contains every failure from every field. 
+  However, if any of the parameters are invalid, the whole expression becomes invalid and contains every failure from every field.
   This creates the aggregated result.
 
   There is also a call to the '(<!)' function.
-  This function is read as 'aggregateFailures'. 
+  This function is read as 'aggregateFailures'.
   In English, it takes the failures from the second parameter, if any, and adds them to the first.
   This allows the aggregation of failures from fields that are not included in the final type.
 -}
@@ -394,7 +392,7 @@ validate = fromVCtx . validation
   The new value cannot be retrieved from the validation if it failed.
 
   Consider a @'Maybe' 'String'@ value that is required and must be at least 3 characters long.
-  First, the value would pass through the 'isRequired' validator. 
+  First, the value would pass through the 'isRequired' validator.
   If the value is a @'Just' a@, validation succeeds and the value a is passed to the next validator which checks its length.
   If the value is a 'Nothing', it is not possible to check its length.
   Therefore, the validation must be refuted.
@@ -485,12 +483,12 @@ isRight :: f -> ValueCtx (Either a b) -> VCtx f (ValueCtx b)
 isRight f = refuteWith $ \e -> case e of
   Right b -> Right b
   Left _  -> Left f
-  
+
 -- | Checks that the 'Foldable' is empty.
 -- If so, it adds the given failure to the result and validation continues.
 isNull :: Foldable t => f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 isNull f = disputeWith $ bool (Just f) Nothing . null
-  
+
 -- | Checks that the 'Foldable' is not empty.
 -- If not, it adds the given failure to the result and validation continues.
 isNotNull :: Foldable t => f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
@@ -554,31 +552,26 @@ doesNotHaveElem e f = disputeWith $ bool (Just f) Nothing . not . elem e
 -- | If any element is valid, the entire value is valid.
 ifAny :: (a -> Maybe f) -> ValueCtx [a] -> VCtx f (ValueCtx [a])
 ifAny fn v =
-  let 
+  let
     xs = getValue v
     fs = catMaybes $ fmap fn xs
-  in if length fs == length xs 
+  in if length fs == length xs
     then disputeMany v fs
     else pure v
 
 -- | Every element must be valid.
 ifAll :: (a -> Maybe f) -> ValueCtx [a] -> VCtx f (ValueCtx [a])
-ifAll fn v = case catMaybes . fmap fn $ getValue v of 
+ifAll fn v = case catMaybes . fmap fn $ getValue v of
   [] -> pure v
   fs -> disputeMany v fs
 
 -- | Validate each element with a given function.
 ifEach :: (a -> Either f b) -> ValueCtx [a] -> VCtx f (ValueCtx [b])
-ifEach fn v = 
+ifEach fn v =
   let es = fmap fn $ getValue v
-  in case lefts es of 
+  in case lefts es of
     []  -> pure . setValue v $ rights es
     fs -> refuteMany v fs
-
--- | Validates that a value matches a Regex using <https://hackage.haskell.org/package/regex-tdfa regex-tdfa>.
-matchesRegex :: (RegexMaker Regex CompOption ExecOption r, RegexLike Regex a)
-  => r -> f -> ValueCtx a -> VCtx f (ValueCtx a)
-matchesRegex r f = disputeWithFact f (flip (=~) r)
 
 -- | Checks that two fields are equal.
 -- If not, it adds the given failure to the result and validation continues.
@@ -623,7 +616,7 @@ Consider the following example:
   A `ContactVM` with an invalid phone number might have a result like this: `Invalid [] [(['phoneNumber], [InvalidPhoneNumber])]` where `['phoneNumber]` is the key to the map.
   The 'validationField' merges this with the `UserCreatable` result to create something like this: `Invalid [] [(['contact, 'phoneNumber], [InvalidPhoneNumber])]`.
   This allows the consumer to determine exactly what field caused the failure.
--} 
+-}
 validateField :: Validatable f a b => ValueCtx a -> VCtx f (ValueCtx b)
 validateField (Global a) = case validation a of
   ValidCtx b            -> ValidCtx (Global b)

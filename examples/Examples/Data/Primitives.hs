@@ -1,10 +1,10 @@
-{-# LANGUAGE 
+{-# LANGUAGE
     MultiParamTypeClasses
-  , TemplateHaskellQuotes 
+  , TemplateHaskellQuotes
 #-}
 
-module Examples.Data.Primitives 
-( MyFailure (..)
+module Examples.Data.Primitives
+( MyFailures (..)
 , Username
 , mkUsername
 , unUsername
@@ -18,6 +18,7 @@ module Examples.Data.Primitives
 
 ------------------------------------------------------------------------------------------------------------------------
 import Data.Validation
+import Text.Regex.TDFA ((=~))
 ------------------------------------------------------------------------------------------------------------------------
 
 data MyFailures
@@ -38,7 +39,7 @@ instance Show MyFailures where
 newtype Username = Username { unUsername :: String }
   deriving Show
 mkUsername :: String -> Proof MyFailures Username
-mkUsername s = fromVCtx $ do 
+mkUsername s = fromVCtx $ do
   v <- withValue s (isNotNull NameFailure)
   return $ Username v
 
@@ -46,7 +47,8 @@ newtype EmailAddress = EmailAddress { unEmailAddress :: String }
   deriving Show
 mkEmailAddress :: String -> Proof MyFailures EmailAddress
 mkEmailAddress s = fromVCtx $ do
-  v <- withValue s (matchesRegex "[a-zA-Z0-9+._-]+@[a-zA-Z-]+\\.[a-z]+" EmailFailure)
+  -- validates email matches a Regex using <https://hackage.haskell.org/package/regex-tdfa regex-tdfa>.
+  v <- withValue s (disputeWithFact EmailFailure (flip (=~) "[a-zA-Z0-9+._-]+@[a-zA-Z-]+\\.[a-z]+"))
   return $ EmailAddress v
 
 newtype PhoneNumber = PhoneNumber { unPhoneNumber :: String }
