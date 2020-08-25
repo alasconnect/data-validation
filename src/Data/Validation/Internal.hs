@@ -25,6 +25,9 @@ instance Semigroup a => Semigroup (VCtx f a) where
   (RefutedCtx gfs1 lfs1)     <> (DisputedCtx gfs2 lfs2 _)  = RefutedCtx (gfs1 <> gfs2) (unionWith (<>) lfs1 lfs2)
   (RefutedCtx gfs1 lfs1)     <> (RefutedCtx gfs2 lfs2)     = RefutedCtx (gfs1 <> gfs2) (unionWith (<>) lfs1 lfs2)
 
+instance Monoid a => Monoid (VCtx f a) where
+  mempty = ValidCtx mempty
+
 instance Functor (VCtx f) where
   fmap f (ValidCtx a)            = ValidCtx (f a)
   fmap f (DisputedCtx gps lfs a) = DisputedCtx gps lfs (f a)

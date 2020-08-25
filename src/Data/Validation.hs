@@ -57,6 +57,7 @@ module Data.Validation
 , ifAny
 , ifAll
 , ifEach
+, ifEachProven
 , isMatch
 -- * Validation Helpers
 , validateField
@@ -76,7 +77,8 @@ module Data.Validation
 import Prelude hiding (foldl)
 import Data.Bool
 import Data.Either (Either(..), rights, lefts)
-import Data.Map hiding (null)
+import Data.Foldable (fold)
+import Data.Map hiding (null, fold)
 import Data.Maybe
 import Language.Haskell.TH (Name, mkName, nameBase)
 ------------------------------------------------------------------------------------------------------------------------
@@ -172,6 +174,9 @@ instance Semigroup a => Semigroup (Proof f a) where
   (Invalid gfs1 lfs1) <> (Invalid gfs2 lfs2)  = Invalid (gfs1 <> gfs2) (unionWith (<>) lfs1 lfs2)
   (Valid _)           <> (Invalid gfs lfs)    = Invalid gfs lfs
   (Invalid gfs lfs)   <> (Valid _)            = Invalid gfs lfs
+
+instance Monoid a => Monoid (Proof f a) where
+  mempty = Valid mempty
 
 instance Functor (Proof f) where
   fmap fn (Valid a)        = Valid (fn a)
@@ -572,6 +577,16 @@ ifEach fn v =
   in case lefts es of
     []  -> pure . setValue v $ rights es
     fs -> refuteMany v fs
+
+-- | Validate each element with a given function.
+ifEachProven :: (a -> Proof f b) -> ValueCtx [a] -> VCtx f (ValueCtx [b])
+ifEachProven fn v = 
+  let p = fold $ fmap (fmap (\b -> [b]) . fn) $ getValue v
+  in case p of 
+    Valid es -> pure $ setValue v es
+    Invalid gfs lfs -> case v of
+      Global _  -> RefutedCtx gfs lfs
+      Field n _ -> RefutedCtx [] $ insert [n] gfs lfs
 
 -- | Checks that two fields are equal.
 -- If not, it adds the given failure to the result and validation continues.

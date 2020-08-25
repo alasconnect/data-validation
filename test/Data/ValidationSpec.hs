@@ -433,6 +433,20 @@ spec = parallel $ do
         v2 = Global [1, 2, 3]
       r `shouldBe` pure v2
 
+  describe "ifEachProven" $ do
+    it "Adds a failure to the context if any element in the list does not pass the check." $ do
+      let
+        v = Global ["1234567", "7654321", "5555555", "bat"]
+        r = ifEachProven mkPhoneNumber v
+      r `shouldBe` refute v "Phone number is the wrong length."
+
+    it "Should add no failure if every element in the list passed the check." $ do
+      let
+        v = Global ["1234567", "7654321", "5555555"]
+        r = ifEachProven mkPhoneNumber v
+        v2 = Global [PhoneNumber "1234567", PhoneNumber "7654321", PhoneNumber "5555555"]
+      r `shouldBe` pure v2
+
   describe "isMatch" $ do
     it "Adds a failure to the context if value does not match the given value." $ do
       let
@@ -465,6 +479,13 @@ data ContactVM
   = ContactVM
   { phoneNumber :: String
   } deriving (Show, Eq)
+
+newtype PhoneNumber = PhoneNumber { unPhoneNumber :: String }
+  deriving (Show, Eq)
+mkPhoneNumber :: String -> Proof String PhoneNumber
+mkPhoneNumber s = fromVCtx $ do
+  v <- withValue s (isLength 7 "Phone number is the wrong length.")
+  return $ PhoneNumber v
 
 instance Validatable String ContactVM Contact where
   validation c =
