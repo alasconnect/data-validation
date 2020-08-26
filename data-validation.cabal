@@ -1,12 +1,22 @@
 cabal-version:       2.4
 name:                data-validation
 version:             0.1.0.0
+synopsis:            A library for creating type safe validations.
+description:
+  A library for creating type safe validations using typeclasses.
+homepage:            https://github.com/alasconnect/data-validation
 license:             Apache-2.0
 license-file:        LICENSE
 author:              Alasconnect
-maintainer:
+maintainer:          Alasconnect <software@alasconnect.com>
+copyright:           2020 AlasConnect LLC
 category:            Data
 extra-source-files:  CHANGELOG.md, README.md
+
+source-repository head
+  type: git
+  location: https://github.com/alasconnect/data-validation
+  tag: 0.1.0.0
 
 library
   exposed-modules:    Data.Validation
@@ -17,7 +27,7 @@ library
                     , template-haskell >= 2.14.0 && < 2.15
   hs-source-dirs:     src
   default-language:   Haskell2010
-  ghc-options:       -Wall -j -O0 -v0
+  ghc-options:       -Wall -v0
 
 test-suite test-data-validation
   type:             exitcode-stdio-1.0
