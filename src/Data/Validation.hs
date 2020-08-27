@@ -86,7 +86,7 @@ import Data.Validation.Internal
 ------------------------------------------------------------------------------------------------------------------------
 
 {- $basics
-  Validation generally takes the form of `a -> Either f b` where:
+  Validation generally takes the form of @a -> Either f b@ where:
 
   [@a@]: Some unvalidated type.
 
@@ -105,13 +105,13 @@ import Data.Validation.Internal
 
   * @a@ ~ 'String'
   * @b@ ~ EmailAddress
-  * @c@ ~ MyFailures
+  * @f@ ~ MyFailures
 
 -}
 
 {- $proof
 
-  The transformation from `a` to `b` is important and provides a type safe way to prove that validation was successful.
+  The transformation from @a@ to @b@ is important and provides a type safe way to prove that validation was successful.
   However, rather than using the 'Either' type, this library uses the 'Proof' type.
   A 'Proof' represents either a validated type or a collection of failures.
   Notice, we use the term validation /failures/ instead of /errors/
