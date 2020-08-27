@@ -160,7 +160,7 @@ import Data.Validation.Internal
   In that case, the key would need to identify that the `phoneNumber` field is a subfield of `contact`.
   The key would look like this:
 
-  >> ['contact, 'phoneNumber]
+  > ['contact, 'phoneNumber]
 -}
 
 -- | A type that holds either validation failures or a validated value.
@@ -374,9 +374,12 @@ withValue a fn = fn (Global a) >>= pure . getValue
 -- | A type class that represents a value that can be validated.
 --
 -- The parameters represent the following:
--- * `f`: the type of validation failures.
--- * `a`: the unvalidated type or view model.
--- * `b`: the validated type.
+--
+-- * @f@: the type of validation failures.
+--
+-- * @a@: the unvalidated type or view model.
+--
+-- * @b@: the validated type.
 class Validatable f a b | a -> f b where
   validation :: a -> VCtx f b
 
