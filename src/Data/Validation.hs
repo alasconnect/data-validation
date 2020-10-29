@@ -66,6 +66,7 @@ module Data.Validation
 , (<!)
 , isValid
 , isInvalid
+, flattenProofs
 -- * Re-exports
 , VCtx
 , Name
@@ -583,9 +584,9 @@ ifEach fn v =
 
 -- | Validate each element with a given function.
 ifEachProven :: (a -> Proof f b) -> ValueCtx [a] -> VCtx f (ValueCtx [b])
-ifEachProven fn v = 
+ifEachProven fn v =
   let p = fold $ fmap (fmap (\b -> [b]) . fn) $ getValue v
-  in case p of 
+  in case p of
     Valid es -> pure $ setValue v es
     Invalid gfs lfs -> case v of
       Global _  -> RefutedCtx gfs lfs
@@ -665,3 +666,7 @@ isValid (Invalid _ _) = False
 -- | tests if a 'Proof' is invalid.
 isInvalid :: Proof f a -> Bool
 isInvalid = not . isValid
+
+-- | Flatten a list of proofs into a proof of the list
+flattenProofs :: [Proof f a] -> Proof f [a]
+flattenProofs al = mconcat $ fmap (:[]) <$> al
