@@ -1,5 +1,10 @@
 # Revision history for data-validation
 
+## 0.1.1.0 -- 2020-10-29
+
+* Added helper for flattening a list of proofs.
+* Loosen package version requirements after testing with GHC 8.8.
+
 ## 0.1.0.2 -- 2020-09-09
 
 * Loosen package version requirements.
