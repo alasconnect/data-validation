@@ -62,6 +62,8 @@ module Data.Validation
 -- * Validation Helpers
 , validateField
 , optional
+, validateWhen
+, validateUnless
 , aggregateFailures
 , (<!)
 , isValid
@@ -77,7 +79,7 @@ module Data.Validation
 ------------------------------------------------------------------------------------------------------------------------
 import Prelude hiding (foldl)
 import Data.Bool
-import Data.Either (Either(..), rights, lefts)
+import Data.Either (rights, lefts)
 import Data.Foldable (fold)
 import Data.Map hiding (null, fold)
 import Data.Maybe
@@ -658,52 +660,14 @@ optional (Just a) f =
     DisputedCtx gfs lfs b -> DisputedCtx gfs lfs (Just b)
     RefutedCtx gfs lfs    -> RefutedCtx gfs lfs
 
--- | Allows for Global Validation of a conditionally required value.
--- performs validation iff condition is true, failure if true and Nothing value given
--- See `Validating Complex Types` for an example.
-requiredIf ::
-     Bool            -- ^ Is Required
-  -> f               -- ^ Missing Required Failure
-  -> Maybe a         -- ^ Maybe Value
-  -> (a -> VCtx f b) -- ^ Validation Function
-  -> VCtx f (Maybe b)
-requiredIf True f Nothing _ = RefutedCtx [f] mempty
-requiredIf _ _ m fn  = optional m fn
+-- | Runs a set of validations only when a requirement is met.
+validateWhen :: Bool -> VCtx f b -> VCtx f (Maybe b)
+validateWhen False _ = pure Nothing
+validateWhen True v  = fmap Just v
 
--- | Allows for Global Validation of a value that should only be present conditionally.
--- performs validation iff condition is false, failure if true and Just value given
-unwantedIf ::
-     Bool            -- ^ Is Unwanted
-  -> f               -- ^ Present but Unwanted Failure
-  -> Maybe a         -- ^ Maybe Value
-  -> (a -> VCtx f b) -- ^ Validation Function
-  -> VCtx f (Maybe b)
-unwantedIf True f (Just _) _ = RefutedCtx [f] mempty
-unwantedIf _ _ m fn  = optional m fn
-
--- | Allows for Field Validation of a conditionally required value.
--- performs validation iff condition is true, failure if true and Nothing value given
-requiredIfField ::
-     Bool            -- ^ Is Required
-  -> f               -- ^ Missing Required Failure
-  -> Name            -- ^ Field Name
-  -> Maybe a         -- ^ Maybe Value
-  -> (a -> VCtx f b) -- ^ Validation Function
-  -> VCtx f (Maybe b)
-requiredIf True f n Nothing _ = RefutedCtx [] (singleton [n] [f])
-requiredIf _ _ _ m fn  = optional m fn
-
--- | Allows for Field Validation of a value that should only be present conditionally.
--- performs validation iff condition is false, failure if true and Just value given
-unwantedIfField ::
-     Bool            -- ^ Is Unwanted
-  -> f               -- ^ Present but Unwanted Failure
-  -> Name            -- ^ Field Name
-  -> Maybe a         -- ^ Maybe Value
-  -> (a -> VCtx f b) -- ^ Validation Function
-  -> VCtx f (Maybe b)
-unwantedIf True f n (Just _) _ = RefutedCtx [] (singleton [n] [f])
-unwantedIf _ _ _ m fn  = optional m fn
+-- | Runs a set of validations when a requirement is not met.
+validateUnless :: Bool -> VCtx f b -> VCtx f (Maybe b)
+validateUnless b = validateWhen (not b)
 
 -- | tests if a 'Proof' is valid.
 isValid :: Proof f a -> Bool

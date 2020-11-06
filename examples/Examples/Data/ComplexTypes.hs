@@ -33,8 +33,10 @@ instance Validatable MyFailures UserVM User where
     let vn = withField 'userVMUsername (userVMUsername u) $
           \n -> isRequired RequiredFailure n
           >>= refuteWithProof mkUsername
-        ve = requiredIf (userVMHasEmail u) RequiredFailure (userVMEmailAddress u) $
-          \e -> withField 'userVMEmailAddress e $ refuteWithProof mkEmailAddress
+        ve = validateWhen (userVMHasEmail u) $
+          withField 'userVMEmailAddress (userVMEmailAddress u) $
+            \e -> isRequired RequiredFailure e
+            >>= refuteWithProof mkEmailAddress 
         vp = optional (userVMPhoneNumber u) $ \un ->
           withField 'userVMPhoneNumber un $ refuteWithProof mkPhoneNumber
         otherCheck = withValue u check
