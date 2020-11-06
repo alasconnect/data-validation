@@ -14,18 +14,21 @@ import Examples.Data.Primitives
 -- View Model
 data UserVM
   = UserVM
-  { userVMUsername      :: Maybe String
-  , userVMHasEmail      :: Bool         -- Condition to store email
-  , userVMEmailAddress  :: Maybe String
-  , userVMPhoneNumber   :: Maybe String
+  { userVMUsername          :: Maybe String
+  , userVMEmailAddress      :: Maybe String
+  , userVMPhoneNumber       :: Maybe String
+  , userVMContactPreference :: Maybe ContactPreference
+  , userVMPreferenceOther   :: Maybe String
   } deriving (Show)
 
 -- Actual Model
 data User
   = User
-  { userUsername     :: Username
-  , userEmailAddress :: Maybe EmailAddress -- Conditionally stored email
-  , userPhoneNumber  :: Maybe PhoneNumber
+  { userUsername          :: Username
+  , userEmailAddress      :: EmailAddress
+  , userPhoneNumber       :: Maybe PhoneNumber
+  , userContactPreference :: ContactPreference
+  , userPreferenceOther   :: Maybe PreferenceOther
   } deriving (Show)
 
 instance Validatable MyFailures UserVM User where
@@ -33,14 +36,20 @@ instance Validatable MyFailures UserVM User where
     let vn = withField 'userVMUsername (userVMUsername u) $
           \n -> isRequired RequiredFailure n
           >>= refuteWithProof mkUsername
-        ve = validateWhen (userVMHasEmail u) $
-          withField 'userVMEmailAddress (userVMEmailAddress u) $
-            \e -> isRequired RequiredFailure e
-            >>= refuteWithProof mkEmailAddress 
+        ve = withField 'userVMEmailAddress (userVMEmailAddress u) $
+          \e -> isRequired RequiredFailure e
+          >>= refuteWithProof mkEmailAddress
         vp = optional (userVMPhoneNumber u) $ \un ->
           withField 'userVMPhoneNumber un $ refuteWithProof mkPhoneNumber
+        cp = withField 'userVMContactPreference (userVMContactPreference u) $
+          \p -> isRequired RequiredFailure p
+        -- PreferenceOther is only required when ContactPreference is Other
+        po = validateWhen (userVMContactPreference u == Just Other) $
+          withField 'userVMPreferenceOther (userVMPreferenceOther u) $
+            \o -> isRequired RequiredFailure o
+            >>= refuteWithProof mkPreferenceOther
         otherCheck = withValue u check
-    pure User <*> vn <*> ve <*> vp <! otherCheck
+    pure User <*> vn <*> ve <*> vp <*> cp <*> po <! otherCheck
     where
       -- arbitrary check
       check = disputeWithFact OtherFailure (\v -> userVMUsername v /= userVMEmailAddress v)
