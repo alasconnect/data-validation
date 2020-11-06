@@ -494,26 +494,26 @@ isRight f = refuteWith $ \e -> case e of
   Left _  -> Left f
 
 -- | Checks that the 'Foldable' is empty.
--- If so, it adds the given failure to the result and validation continues.
+-- If not, it adds the given failure to the result and validation continues.
 isNull :: Foldable t => f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 isNull f = disputeWith $ bool (Just f) Nothing . null
 
 -- | Checks that the 'Foldable' is not empty.
--- If not, it adds the given failure to the result and validation continues.
+-- If empty, it adds the given failure to the result and validation continues.
 isNotNull :: Foldable t => f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 isNotNull f = disputeWith $ bool (Just f) Nothing . not . null
 
--- | Checks that a 'IsString' has a length equal to or grater than the given value.
+-- | Checks that a 'Foldable' has a length equal to or greater than the given value.
 -- If not, it adds the given failure to the result and validation continues.
 minLength :: Foldable t => Int -> f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 minLength l f = disputeWith $ bool (Just f) Nothing . (<=) l . length
 
--- | Checks that a 'IsString' has a length equal to or less than the given value.
+-- | Checks that a 'Foldable' has a length equal to or less than the given value.
 -- If not, it adds the given failure to the result and validation continues.
 maxLength :: Foldable t => Int -> f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 maxLength l f = disputeWith $ bool (Just f) Nothing . (>=) l . length
 
--- | Checks that a 'IsString' has a length equal the given value.
+-- | Checks that a 'Foldable' has a length equal to the given value.
 -- If not, it adds the given failure to the result and validation continues.
 isLength :: Foldable t => Int -> f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 isLength l f = disputeWith $ bool (Just f) Nothing . (==) l . length
@@ -524,16 +524,16 @@ isEqual :: Eq a => a -> f -> ValueCtx a -> VCtx f (ValueCtx a)
 isEqual a f = disputeWith $ bool (Just f) Nothing . (==) a
 
 -- | Checks that a value is not equal to another.
--- If not, it adds the given failure to the result and validation continues.
+-- If equal, it adds the given failure to the result and validation continues.
 isNotEqual :: Eq a => a -> f -> ValueCtx a -> VCtx f (ValueCtx a)
 isNotEqual a f = disputeWith $ bool (Just f) Nothing . (/=) a
 
--- | Checks that a value is less than to another.
+-- | Checks that a value is less than another.
 -- If not, it adds the given failure to the result and validation continues.
 isLessThan :: Ord a => a -> f -> ValueCtx a -> VCtx f (ValueCtx a)
 isLessThan a f = disputeWith $ bool (Just f) Nothing . (>) a
 
--- | Checks that a value is greater than to another.
+-- | Checks that a value is greater than another.
 -- If not, it adds the given failure to the result and validation continues.
 isGreaterThan :: Ord a => a -> f -> ValueCtx a -> VCtx f (ValueCtx a)
 isGreaterThan a f = disputeWith $ bool (Just f) Nothing . (<) a
@@ -554,7 +554,7 @@ hasElem :: (Foldable t, Eq a) => a -> f -> ValueCtx (t a) -> VCtx f (ValueCtx (t
 hasElem e f = disputeWith $ bool (Just f) Nothing . elem e
 
 -- | Checks that a 'Foldable' does not have a given element.
--- If not, it adds the given failure to the result and validation continues.
+-- If it has element, it adds the given failure to the result and validation continues.
 doesNotHaveElem :: (Foldable t, Eq a) => a -> f -> ValueCtx (t a) -> VCtx f (ValueCtx (t a))
 doesNotHaveElem e f = disputeWith $ bool (Just f) Nothing . not . elem e
 
