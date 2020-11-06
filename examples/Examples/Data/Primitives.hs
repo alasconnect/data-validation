@@ -14,6 +14,10 @@ module Examples.Data.Primitives
 , PhoneNumber
 , mkPhoneNumber
 , unPhoneNumber
+, ContactPreference (..)
+, ZipCode
+, mkZipCode
+, unZipCode
 ) where
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -57,3 +61,13 @@ mkPhoneNumber :: String -> Proof MyFailures PhoneNumber
 mkPhoneNumber s = fromVCtx $ do
   v <- withValue s (isLength 7 LengthFailure)
   return $ PhoneNumber v
+
+data ContactPreference
+  = Email | Phone deriving (Enum, Eq, Show)
+
+newtype ZipCode = ZipCode { unZipCode :: String }
+  deriving Show
+mkZipCode :: String -> Proof MyFailures ZipCode
+mkZipCode s = fromVCtx $ do
+  v <- withValue s (isNotNull OtherFailure)
+  return $ ZipCode v
