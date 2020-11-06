@@ -15,6 +15,7 @@ import Examples.Data.Primitives
 data UserVM
   = UserVM
   { userVMUsername      :: Maybe String
+  , userVMHasEmail      :: Bool         -- Condition to store email
   , userVMEmailAddress  :: Maybe String
   , userVMPhoneNumber   :: Maybe String
   } deriving (Show)
@@ -23,7 +24,7 @@ data UserVM
 data User
   = User
   { userUsername     :: Username
-  , userEmailAddress :: EmailAddress
+  , userEmailAddress :: Maybe EmailAddress -- Conditionally stored email
   , userPhoneNumber  :: Maybe PhoneNumber
   } deriving (Show)
 
@@ -32,9 +33,8 @@ instance Validatable MyFailures UserVM User where
     let vn = withField 'userVMUsername (userVMUsername u) $
           \n -> isRequired RequiredFailure n
           >>= refuteWithProof mkUsername
-        ve = withField 'userVMEmailAddress (userVMEmailAddress u) $
-          \e -> isRequired RequiredFailure e
-          >>= refuteWithProof mkEmailAddress
+        ve = requiredIf (userVMHasEmail u) RequiredFailure (userVMEmailAddress u) $
+          \e -> withField 'userVMEmailAddress e $ refuteWithProof mkEmailAddress
         vp = optional (userVMPhoneNumber u) $ \un ->
           withField 'userVMPhoneNumber un $ refuteWithProof mkPhoneNumber
         otherCheck = withValue u check
