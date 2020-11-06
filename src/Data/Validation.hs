@@ -660,6 +660,7 @@ optional (Just a) f =
 
 -- | Allows for Global Validation of a conditionally required value.
 -- performs validation iff condition is true, failure if true and Nothing value given
+-- See `Validating Complex Types` for an example.
 requiredIf ::
      Bool            -- ^ Is Required
   -> f               -- ^ Missing Required Failure
