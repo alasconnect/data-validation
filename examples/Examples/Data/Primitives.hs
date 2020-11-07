@@ -15,9 +15,9 @@ module Examples.Data.Primitives
 , mkPhoneNumber
 , unPhoneNumber
 , ContactPreference (..)
-, PreferenceOther
-, mkPreferenceOther
-, unPreferenceOther
+, ZipCode
+, mkZipCode
+, unZipCode
 ) where
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -63,11 +63,11 @@ mkPhoneNumber s = fromVCtx $ do
   return $ PhoneNumber v
 
 data ContactPreference
-  = Email | Phone | Other deriving (Enum, Eq, Show)
+  = Email | Phone deriving (Enum, Eq, Show)
 
-newtype PreferenceOther = PreferenceOther { unPreferenceOther :: String }
+newtype ZipCode = ZipCode { unZipCode :: String }
   deriving Show
-mkPreferenceOther :: String -> Proof MyFailures PreferenceOther
-mkPreferenceOther s = fromVCtx $ do
+mkZipCode :: String -> Proof MyFailures ZipCode
+mkZipCode s = fromVCtx $ do
   v <- withValue s (isNotNull OtherFailure)
-  return $ PreferenceOther v
+  return $ ZipCode v
