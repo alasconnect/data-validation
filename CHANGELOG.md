@@ -1,5 +1,11 @@
 # Revision history for data-validation
 
+## 0.1.2.0 -- 2020-11-10
+
+* Minor changes to haddocks.
+* Added conditional requirement helper functions.
+* Expanded example and tests.
+
 ## 0.1.1.0 -- 2020-10-29
 
 * Added helper for flattening a list of proofs.
