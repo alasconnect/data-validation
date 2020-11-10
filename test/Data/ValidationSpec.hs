@@ -134,6 +134,31 @@ spec = parallel $ do
         r = isRequired "Failed" v
       r `shouldBe` pure v2
 
+  describe "isRequiredWhen" $ do
+    it "Adds a failure to the context if the condition is True and the value is Nothing." $ do
+      let
+        v = Global (Nothing :: Maybe Bool)
+        r = isRequiredWhen "Failed" True v
+      r `shouldBe` dispute v "Failed"
+
+    it "Should add no failure when the condition is False and the value is Nothing." $ do
+      let
+        v = Global (Nothing :: Maybe Bool)
+        r = isRequiredWhen "Failed" False v
+      r `shouldBe` pure v
+
+    it "Should add no failure if the condition is True and the value is Just." $ do
+      let
+        v = Global $ Just True
+        r = isRequiredWhen "Failed" True v
+      r `shouldBe` pure v
+
+    it "Should add no failure if the condition is False and the value is Just." $ do
+      let
+        v = Global $ Just True
+        r = isRequiredWhen "Failed" False v
+      r `shouldBe` pure v
+
   describe "isLeft" $ do
     it "Adds a failure to the context if the value is Right." $ do
       let
@@ -477,6 +502,15 @@ spec = parallel $ do
     it "Just value is will validate if optional" $ do
       let c = (ContactVM "")
       let proof = fromVCtx $ optional (Just c) $ \v -> withValue v $ validateField
+      proof `shouldBe` Invalid [] (fromList [(['phoneNumber], ["Phone Number cannot be empty."])])
+
+  describe "whenJust" $ do
+    it "Nothing value is valid if optional" $ do
+      let proof = fromVCtx $ withValue (Nothing :: Maybe ContactVM) $ whenJust validateField
+      proof `shouldBe` Valid Nothing
+    it "Just value is will validate if optional" $ do
+      let c = (ContactVM "")
+      let proof = fromVCtx $ withValue (Just c) $ whenJust validateField
       proof `shouldBe` Invalid [] (fromList [(['phoneNumber], ["Phone Number cannot be empty."])])
 
 data Contact
