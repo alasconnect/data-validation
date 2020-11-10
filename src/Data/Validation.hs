@@ -39,6 +39,8 @@ module Data.Validation
 , disputeWithFact
 -- * General Validators
 , isRequired
+, isRequiredWhen
+, isRequiredUnless
 , isLeft
 , isRight
 , isNull
@@ -62,6 +64,7 @@ module Data.Validation
 -- * Validation Helpers
 , validateField
 , optional
+, whenJust
 , aggregateFailures
 , (<!)
 , isValid
@@ -77,7 +80,7 @@ module Data.Validation
 ------------------------------------------------------------------------------------------------------------------------
 import Prelude hiding (foldl)
 import Data.Bool
-import Data.Either (Either(..), rights, lefts)
+import Data.Either (rights, lefts)
 import Data.Foldable (fold)
 import Data.Map hiding (null, fold)
 import Data.Maybe
@@ -241,8 +244,7 @@ getValue (Global a)  = a
 
 -- | Replaces the existing value with a new one without changing the name, if one exists.
 setValue :: ValueCtx a -> b -> ValueCtx b
-setValue (Field n _) b = Field n b
-setValue (Global _) b  = Global b
+setValue v b = b <$ v
 
 -- | Performs some given validation using a 'Field' with a given name and value.
 withField :: Name -> a -> (ValueCtx a -> VCtx f (ValueCtx b)) -> VCtx f b
@@ -479,6 +481,21 @@ isRequired f = refuteWith $ \ma -> case ma of
   Nothing -> Left f
   Just a  -> Right a
 
+-- | Checks that a 'Data.Maybe.Maybe' value is a 'Data.Maybe.Just' when some condition is true.
+-- If the condition is met and the value is 'Data.Maybe.Just', 
+-- it adds the given failure to the result and validation continues.
+isRequiredWhen :: f -> Bool -> ValueCtx (Maybe a) -> VCtx f (ValueCtx (Maybe a))
+isRequiredWhen _ False v = return v
+isRequiredWhen f True v  = flip disputeWith v $ \ma -> case ma of
+  Nothing -> Just f
+  Just _  -> Nothing
+
+-- | Checks that a 'Data.Maybe.Maybe' value is a 'Data.Maybe.Just' when some condition is false.
+-- If the condition is not met and the value is 'Data.Maybe.Just', 
+-- it adds the given failure to the result and validation continues.
+isRequiredUnless :: f -> Bool -> ValueCtx (Maybe a) -> VCtx f (ValueCtx (Maybe a))
+isRequiredUnless f b v = isRequiredWhen f (not b) v
+
 -- | Checks that a 'Data.Either.Either' value is a 'Data.Either.Left'.
 -- If not, it adds the given failure to the result and validation end.
 isLeft :: f -> ValueCtx (Either a b) -> VCtx f (ValueCtx a)
@@ -657,6 +674,13 @@ optional (Just a) f =
     ValidCtx b            -> ValidCtx (Just b)
     DisputedCtx gfs lfs b -> DisputedCtx gfs lfs (Just b)
     RefutedCtx gfs lfs    -> RefutedCtx gfs lfs
+
+-- | Allows for validation of an optional value.
+-- See `Validating Complex Types` for an example.
+whenJust :: (ValueCtx a -> VCtx f (ValueCtx b)) -> ValueCtx (Maybe a) -> VCtx f (ValueCtx (Maybe b))
+whenJust fn v = case getValue v of
+  Nothing -> pure $ Nothing <$ v
+  Just a  -> fmap (fmap Just) $ fn $ a <$ v
 
 -- | tests if a 'Proof' is valid.
 isValid :: Proof f a -> Bool
