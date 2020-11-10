@@ -37,14 +37,12 @@ instance Validatable MyFailures UserVM User where
           \n -> isRequired RequiredFailure n
           >>= refuteWithProof mkUsername
         -- EmailAdress and PhoneNumber are only required when ContactPreference matches
-        ve = validateWhen (userVMContactPreference u == Just Email) $
-          withField 'userVMEmailAddress (userVMEmailAddress u) $
-            \e -> isRequired RequiredFailure e
-            >>= refuteWithProof mkEmailAddress
-        vp = validateWhen (userVMContactPreference u == Just Phone) $
-          withField 'userVMPhoneNumber (userVMPhoneNumber u) $
-            \p -> isRequired RequiredFailure p
-            >>= refuteWithProof mkPhoneNumber
+        ve = withField 'userVMEmailAddress (userVMEmailAddress u) $
+          \me -> isRequiredWhen RequiredFailure (userVMContactPreference u == Just Email) me
+          >>= whenJust (refuteWithProof mkEmailAddress)
+        vp = withField 'userVMPhoneNumber (userVMPhoneNumber u) $
+            \mp -> isRequiredWhen RequiredFailure (userVMContactPreference u == Just Phone) mp
+            >>= whenJust (refuteWithProof mkPhoneNumber)
         cp = withField 'userVMContactPreference (userVMContactPreference u) $
           \p -> isRequired RequiredFailure p
         -- ZipCode is completely optional

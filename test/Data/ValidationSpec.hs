@@ -479,16 +479,6 @@ spec = parallel $ do
       let proof = fromVCtx $ optional (Just c) $ \v -> withValue v $ validateField
       proof `shouldBe` Invalid [] (fromList [(['phoneNumber], ["Phone Number cannot be empty."])])
 
-  describe "validateWhen" $ do
-    it "Invalid value is Valid Nothing if validateWhen conditional is False" $ do
-      let c = (ContactVM "")
-      let proof = fromVCtx $ validateWhen False $ withValue c $ validateField
-      proof `shouldBe` Valid Nothing
-    it "Invalid value is invalid if validateWhen conditional is True" $ do
-      let c = (ContactVM "")
-      let proof = fromVCtx $ validateWhen True $ withValue c $ validateField
-      proof `shouldBe` Invalid [] (fromList [(['phoneNumber], ["Phone Number cannot be empty."])])
-
 data Contact
   = Contact
   { validPhoneNumber :: String
