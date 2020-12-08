@@ -37,7 +37,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        cabal update
+        cabal update --overwrite-policy=always
         cabal install hspec-discover
         cabal build --only-dependencies --enable-tests --enable-benchmarks
     - name: Build
