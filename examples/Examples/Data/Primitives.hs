@@ -22,7 +22,6 @@ module Examples.Data.Primitives
 
 ------------------------------------------------------------------------------------------------------------------------
 import Data.Validation
-import Text.Regex.TDFA ((=~))
 ------------------------------------------------------------------------------------------------------------------------
 
 data MyFailures
@@ -52,7 +51,7 @@ newtype EmailAddress = EmailAddress { unEmailAddress :: String }
 mkEmailAddress :: String -> Proof MyFailures EmailAddress
 mkEmailAddress s = fromVCtx $ do
   -- validates email matches a Regex using <https://hackage.haskell.org/package/regex-tdfa regex-tdfa>.
-  v <- withValue s (disputeWithFact EmailFailure (flip (=~) "[a-zA-Z0-9+._-]+@[a-zA-Z-]+\\.[a-z]+"))
+  v <- withValue s (disputeWithFact EmailFailure ((==) "[a-zA-Z0-9+._-]+@[a-zA-Z-]+\\.[a-z]+"))
   return $ EmailAddress v
 
 newtype PhoneNumber = PhoneNumber { unPhoneNumber :: String }
