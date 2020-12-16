@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                data-validation
-version:             0.1.2.0
+version:             0.1.2.1
 synopsis:            A library for creating type safe validations.
 description:
   A library for creating type safe validations using typeclasses.
@@ -16,7 +16,7 @@ extra-source-files:  CHANGELOG.md, README.md
 source-repository head
   type: git
   location: https://github.com/alasconnect/data-validation
-  tag: 0.1.2.0
+  tag: 0.1.2.1
 
 library
   exposed-modules:    Data.Validation
