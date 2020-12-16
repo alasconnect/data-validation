@@ -1,5 +1,9 @@
 # Revision history for data-validation
 
+## 0.1.2.2 -- 2020-12-16 
+
+* Minor fix to cabal file.
+
 ## 0.1.2.1 -- 2020-12-15
 
 * Removed example from ghcjs build.
