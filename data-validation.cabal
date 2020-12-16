@@ -29,8 +29,8 @@ library
   default-language:   Haskell2010
   ghc-options:       -Wall -v0
 
-if !(impl(ghcjs))
-  library examples
+library examples
+  if !(impl(ghcjs))
     exposed-modules:    Examples.Data.ComplexTypes
                       , Examples.Data.Primitives
     build-depends:      base >= 4.11.0.1 && < 5
