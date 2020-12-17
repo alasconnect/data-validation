@@ -23,5 +23,3 @@ cabal.project.local~
 .ghc.environment.*
 Vagrantfile
 .vagrant/*
-nix-shell.sh
-shell.nix
