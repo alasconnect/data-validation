@@ -1,5 +1,9 @@
 # Revision history for data-validation
 
+## 0.1.2.3 -- 2020-12-16 
+
+* Changed example to executable build.
+
 ## 0.1.2.2 -- 2020-12-16 
 
 * Minor fix to cabal file.
