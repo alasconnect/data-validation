@@ -1,5 +1,10 @@
 # Revision history for data-validation
 
+## 0.1.2.4 -- 2020-12-17
+
+* Removed example executable build.
+* Added example tests to test-suite.
+
 ## 0.1.2.3 -- 2020-12-16 
 
 * Changed example to executable build.
