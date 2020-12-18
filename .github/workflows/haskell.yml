@@ -10,7 +10,7 @@ jobs:
   build:
 
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       matrix:
         ghc-version: ['8.8.2', '8.6.5', '8.4.4']
@@ -35,6 +35,8 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
+    - name: Cabal Check
+      run: cabal check
     - name: Install dependencies
       run: |
         cabal update
