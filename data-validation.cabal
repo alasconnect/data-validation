@@ -1,4 +1,4 @@
-cabal-version:       2.4
+cabal-version:       >=1.10
 name:                data-validation
 version:             0.1.2.4
 synopsis:            A library for creating type safe validations.
@@ -11,6 +11,7 @@ author:              Ampersand
 maintainer:          Ampersand <software@ampersandtech.com>
 copyright:           2020 AlasConnect LLC
 category:            Data
+build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 
 source-repository head
