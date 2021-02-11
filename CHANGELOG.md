@@ -1,5 +1,9 @@
 # Revision history for data-validation
 
+## 0.1.2.5 -- 2021-2-11
+
+* Loosened cabal version constraint.
+
 ## 0.1.2.4 -- 2020-12-17
 
 * Removed example executable build.
